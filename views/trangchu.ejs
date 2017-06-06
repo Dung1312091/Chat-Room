@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Wed Chat</title>
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+	<script src="socket.io/socket.io.js"></script>
+	<style>
+		select[multiple], select[size] {
+    	height: auto;
+    	border-color: #b3e0f7;
+	}
+	.chon{
+		padding: 10px 0px 10px 0px;
+		text-align: center;
+	}
+	.chon1{
+		padding: 10px 0px 10px 0px;
+		background-color: #dedede;
+		border-radius: 2px;
+		/*margin: 0px 300px 0px 50px;*/
+		margin-top: 5px;
+		color: black;
+	}
+	.chon2{
+		padding: 10px 0px 10px 0px;
+		background-color:#4080ff;
+		border-radius: 20px;
+		margin: 0px 50px 0px 300px;
+		margin-top: 5px;
+		color: #fff;
+		height: 50px;
+	}
+	.list-group-item {
+		background-color: #eee;
+		border: 1px solid #85b6e0;
+		margin-top: 3px;
+
+
+	}
+	</style>
+</head>
+<body>
+<div class="container">
+	<div class="row">
+		<div class="col-md-6 col-md-push-3">
+			<div class="input-group">
+		      <input type="text" class="form-control" placeholder="Nhập tên phòng" id="txttenphong">
+		      <span class="input-group-btn">
+		        <button class="btn btn-default" type="button" id="taophong">Tạo Phòng</button>
+		      </span>
+		    </div>
+		</div>
+	</div>
+
+	<div class="row" style="margin-top: 25px" >
+		<div class="col-md-3 col-sm-3 col-xs-3" >
+			<div class="list-group">
+			<center>
+			  <li class="list-group-item list-group-item-info">Danh Sách Nhóm</li>
+			</center>
+			  <div class="form-group" >
+				      <select multiple class="form-control" id="sel2">   
+				      </select>
+				</div>	
+			</div>
+		</div>
+		<div class="col-md-9 col-sm-9 col-xs-9">
+			<div class="panel panel-primary">
+			  <div class="panel-heading" style="text-align: right;"><span id="tenphongchat"></span></div>
+			  <div  >
+			  	<div class="form-group" >
+				      <select multiple class="form-control" id="sel3">   
+				      </select>
+				</div>
+			  </div>
+			  <did>
+			  	 <div class="input-group">
+		      <input type="text" class="form-control" placeholder="Nhập tin nhắn" id="nd">
+		      <span class="input-group-btn">
+		        <button class="btn btn-default" type="button" id="sent">Gửi</button>
+		      </span>
+		    </div>
+			  </did>
+			</div>
+		</div>
+	</div>
+	
+</div>
+<script>
+	var socket = io("http://localhost:3000/");
+	socket.on("tao-room-that-bai",function(){
+		alert("Phòng này có rồi em yêu ơi :)))");
+	});
+	socket.on("sever-phat-danh-sach-phong",function(data){
+		$("#sel2").html('');
+		data.map(function(r){
+			$("#sel2").append("<option class='chon' value='"+r+"'>&nbsp;"+ r + "</option>");
+		});
+	});
+	socket.on("sever-phat-ten-phong-chat",function(data){
+		$("#tenphongchat").html('Phòng: ' + data);
+	});
+
+	socket.on("server-sent-chat",function(data){
+		$("#sel3").append("<option class='chon1' value='ABC'>"+ data+"</option>");
+	});
+
+	$(document).ready(function(){
+		$("#taophong").click(function(){
+			var tenphong = $("#txttenphong").val();
+			if(tenphong ==""){
+				alert("Tên phòng không được để trống");
+				$("#txttenphong").focus();
+			}
+			else{
+				alert("Chào em đến với thế giới của anh...:)")
+				socket.emit("tao-room",tenphong);
+				$("#txttenphong").val('');
+			}
+			
+		});
+		$("#sel2").click(function(){
+			var curren = $(this).find(":selected").val()
+			$("#sel3").html('');
+			socket.emit("chon-room",curren);
+		});
+
+		$("#sent").click(function(){
+			// $("#sel3").append("<option class='chon1' value='ABC'>ABCDFGHJKOIYT</option>");
+			// $("#sel3").append("<option class='chon2' value='ABC'>ABCDFGHJKOIYT</option>");
+			var nd = $("#nd").val();
+			socket.emit("client-chat",nd);
+			$("#nd").val('');
+		});
+	});
+</script>
+</body>
+</html>
